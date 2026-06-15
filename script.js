@@ -27,6 +27,12 @@
       btn.classList.toggle("is-active", btn.getAttribute("data-lang") === lang);
     });
 
+    // Elements whose aria-label (not text) should translate.
+    document.querySelectorAll("[data-" + lang + "-label]").forEach(function (el) {
+      var label = el.getAttribute("data-" + lang + "-label");
+      if (label !== null) el.setAttribute("aria-label", label);
+    });
+
     try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
   }
 
@@ -45,13 +51,23 @@
   } catch (e) {}
   applyLanguage(initial);
 
-  /* ----- Sticky header shadow on scroll ----- */
+  /* ----- Sticky header shadow + scroll-to-top visibility ----- */
   var header = document.getElementById("siteHeader");
+  var toTop = document.getElementById("toTop");
   function onScroll() {
-    if (header) header.classList.toggle("scrolled", window.scrollY > 12);
+    var y = window.scrollY;
+    if (header) header.classList.toggle("scrolled", y > 12);
+    if (toTop) toTop.classList.toggle("is-visible", y > 600);
   }
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
+
+  if (toTop) {
+    toTop.addEventListener("click", function () {
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    });
+  }
 
   /* ----- Mobile nav drawer ----- */
   var menuToggle = document.getElementById("menuToggle");
